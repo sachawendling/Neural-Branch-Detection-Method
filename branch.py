@@ -1,7 +1,22 @@
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt
 
 import lsq
+
+def parametric_linear_interpolation(points):
+    x=points[0:-2:2]
+    y=points[1:-1:2]
+
+    m, b = np.polyfit(x, y, 1)
+
+    # Generate x values to plot the line
+    line_x = np.linspace(x[0], x[-1], 100)
+
+    # Calculate the corresponding y values on the line
+    line_y = m * line_x + b
+
+    return line_x,line_y
 
 class Branch:
     """
@@ -32,12 +47,33 @@ class Branch:
         self.thickness = 0
         self.length = 0
 
+        self.centre = -1
+        self.line = np.array([])
+        self.fonction_centre = None
+
     def is_branching_out(self):
         """
             Retourne True ssi le dernier point de la branche est un point de
             ramification du squelette
         """
         return self.end in self.branching_points
+
+    def relier_centre(self,adjacent,centre,image):
+        """
+            Retourne True ssi le premier point de la branche est le centre
+        """
+        if self.start in adjacent : 
+
+            start_point = self.start
+            end_point = centre
+            # Tracer un segment de ligne droite entre les deux points sur la carte de squelette
+            path_img = np.zeros_like(image)
+            line=cv2.line(path_img, start_point, end_point, 255, 1)
+            for i in range(0,len(line)):
+                for j in range(0,len(line[i])):
+                    if line[i][j]==255 :
+                        self.line=np.append(self.line,np.array([j,i]))
+            self.centre=1
 
     def least_square_approximation(self):
         """
@@ -88,8 +124,15 @@ class Branch:
             Affiche la courbe. Doit être appelée après least_square_approximation().
         """
         t = np.linspace(0, 1, 1000)
+        fonction=[[],[]]
+        if self.centre==1 : 
+            fonction=parametric_linear_interpolation(self.line)
+            self.fonction_centre=fonction
+
         ptx = lsq.compute_parametric_curve(self.lsqcfx, t)
+        ptx=np.concatenate((fonction[0],ptx))
         pty = lsq.compute_parametric_curve(self.lsqcfy, t)
+        pty=np.concatenate((fonction[1],pty))
         plt.plot(ptx, pty, color="blue")
         
     def measure_average_thickness(self, image):
@@ -167,13 +210,14 @@ class Branch:
         ecart_type = np.std(np.array(measurements))
         seuil =  ecart_type
         nouvelle_liste = []
-        for point in measurements:
-            if abs(point - moyenne) < seuil:
-                nouvelle_liste.append(point)
-        
-        # Calcul de la moyenne de la nouvelle liste
-        self.thickness = np.around(np.mean(nouvelle_liste), decimals=2)
-        print("Epaisseur:", self.thickness)
+        if seuil != 0:
+            for point in measurements:
+                if abs(point - moyenne) < seuil:
+                    nouvelle_liste.append(point)
+        if len(nouvelle_liste) != 0:
+            # Calcul de la moyenne de la nouvelle liste
+            self.thickness = np.around(np.mean(nouvelle_liste), decimals=2)
+            print("Epaisseur:", self.thickness)
 
     def measure_length(self):
         """

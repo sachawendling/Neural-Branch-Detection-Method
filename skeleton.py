@@ -12,7 +12,7 @@ class Skeleton:
         des méthodes de plus haut niveau
     """
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, soma):
         """
             Constructeur de la classe Skeleton
             matrix: np.array de dimension 2 qui contient une image binaire du squelette
@@ -29,8 +29,8 @@ class Skeleton:
 
         # Contient des instances de la classe Branch qui sont les branches du squelette
         self.branches = []
-        
-        # self.soma = soma
+        self.main_branch = []
+        self.soma = soma
         self.G = None
 
     def plot(self):
@@ -72,7 +72,7 @@ class Skeleton:
                 and (i+di, j+dj) not in excludeThose
             ]
 
-    def get_branching_points(self):
+    def get_branching_points(self, point_adja):
         """
             Detecter les points de ramification du squelette, c'est-à-dire les points en
             lesquels une branche vient se séparer en deux. On parcourt tous les points du squelette.
@@ -82,6 +82,9 @@ class Skeleton:
 
         # Liste a retourner qui contient les points exacts de ramification
         branching_points = []
+
+        for p in point_adja : 
+            branching_points.append(p)
 
         # Pour chaque point du squelette
         for point in self.points:
@@ -256,8 +259,21 @@ class Skeleton:
                     iteration_counter += 1
                 
                 # On ajoute la branche a la liste des branches du squelette
-                branch = Branch(br_points, self.branching_points)
-                self.branches.append(branch)
+                # branch = Branch(br_points, self.branching_points)
+                # self.branches.append(branch)
+                if (len(br_points) > 5):
+                    branch = Branch(br_points, self.branching_points)
+                    self.branches.append(branch)
+
+    def remplacement_des_points(self,point_adjacent): 
+        i=0 
+        while i<len(self.branching_points) : 
+            if self.branching_points[i] in point_adjacent :
+                self.branching_points.remove(self.branching_points[i])
+            else : 
+                i=i+1
+
+        self.branching_points.append(tuple(self.soma))
             
     def to_graph(self):
         """
@@ -282,41 +298,70 @@ class Skeleton:
         # de manière à construire la liste des arêtes
         edges_list = []
         for b in self.branches:
-            edges_list.append(
-                (b.start, b.end, {'thickness': b.thickness, 'length': b.length})
-            )           
+            if b.centre == 1 : 
+                edges_list.append(
+                    (tuple(self.soma), b.end, {'thickness': b.thickness, 'length': b.length})
+                )
+            else :
+                edges_list.append(
+                    (b.start, b.end, {'thickness': b.thickness, 'length': b.length})
+                )
 
         # Ajouter les arêtes dans le graphe
         G.add_edges_from(edges_list)
-        
-        # H = nx.Graph()
-        # new_edges = []
-        # for (u, v, l) in G.edges.data('length'):
-        #     print(f"({u}, {v}, {l:.3})")
-        #     new_edges.append((u, v, l))
-            
-        # print(new_edges)
-        # # Ajout des arêtes pondérées au graphe
-        # H.add_weighted_edges_from(new_edges)
-        
-        # # Affichage des poids des arêtes
-        # print("la",H.edges.data())
-    
-        
-        # # Affichage des poids des arêtes de G et H
-        # paths = []
-        # for point in ending_points:
-        #     paths.append(nx.bellman_ford_path(H, self.soma, point, weight='weight'))
-        # print(paths)
-        
-        # Prendre le chemin le plus long parmi tous ceux qu'on a calculé
-        
-
         self.G = G
     
-    # def get_main_branch(self):
-    #     """
-    #         Retourne la liste des branches qui forment la branche
-    #         principale, c'est-à-dire le chemin le plus long de G
-    #     """
-    #     pass
+    def get_main_branch(self):
+        """
+            Retourne la liste des branches qui forment la branche
+            principale, c'est-à-dire le chemin le plus long de G
+        """
+        # Creer un graphe H = G tel que H est pondéré uniquement par length
+        H = nx.Graph()
+        new_edges = []
+        for (u, v, l) in self.G.edges.data('length'):
+            new_edges.append((u, v, l))
+            
+        # Ajout des arêtes pondérées au graphe
+        H.add_weighted_edges_from(new_edges)
+
+        edges_list = []
+        for edge in H.edges.data():
+            edges_list.append((edge[0], edge[1], edge[2]['weight']))
+        # print(edges_list)
+
+        # Recuperer tous les chemins partant du soma vers les autres sommets
+        paths = []
+        for node in list(H.nodes):
+            print(type(tuple(self.soma)))
+            paths.append(nx.bellman_ford_path(self.G, tuple(self.soma), node, weight='weight'))
+        # print(paths)
+
+        # Pour chaque chemin calculer la somme des poids des branches
+        weighted_paths = []
+        for path in paths:
+
+            # Somme totale des poids
+            sum_weight = 0
+
+            # On récupère le point de départ et d'arrivée du chemin
+            a, b = path[0], path[-1]
+
+            # Pour chaque noeud du chemin
+            for node_indice in range(0, len(path)-1):
+                x = path[node_indice]
+                y = path[node_indice+1]
+                weight = H.get_edge_data(x, y)['weight']
+                sum_weight += weight
+            weighted_paths.append((a, b, sum_weight))
+
+        # Recuperer la branche principale
+        max_path = max(weighted_paths, key=lambda path: path[2])
+        main_branch_edges = nx.dijkstra_path(H, max_path[0], max_path[1])
+
+        # Stocker la branche principale
+        for i in range(0, len(main_branch_edges)-1):
+            self.main_branch.append((main_branch_edges[i], main_branch_edges[i+1]))
+
+
+    
