@@ -333,7 +333,6 @@ class Skeleton:
         # Recuperer tous les chemins partant du soma vers les autres sommets
         paths = []
         for node in list(H.nodes):
-            print(type(tuple(self.soma)))
             paths.append(nx.bellman_ford_path(self.G, tuple(self.soma), node, weight='weight'))
         # print(paths)
 
@@ -355,13 +354,23 @@ class Skeleton:
                 sum_weight += weight
             weighted_paths.append((a, b, sum_weight))
 
-        # Recuperer la branche principale
-        max_path = max(weighted_paths, key=lambda path: path[2])
-        main_branch_edges = nx.dijkstra_path(H, max_path[0], max_path[1])
+        # Détecter si H possède un cycle
+        cycle = True
+        try:
+            nx.find_cycle(H, orientation="original")
+        except nx.exception.NetworkXNoCycle:
+            cycle = False
 
-        # Stocker la branche principale
-        for i in range(0, len(main_branch_edges)-1):
-            self.main_branch.append((main_branch_edges[i], main_branch_edges[i+1]))
+        # Si H ne possède pas de cycles
+        if cycle == False:
+
+            # Recuperer la branche principale
+            max_path = max(weighted_paths, key=lambda path: path[2])
+            main_branch_edges = nx.dijkstra_path(H, max_path[0], max_path[1])
+
+            # Stocker la branche principale
+            for i in range(0, len(main_branch_edges)-1):
+                self.main_branch.append((main_branch_edges[i], main_branch_edges[i+1]))
 
 
     
