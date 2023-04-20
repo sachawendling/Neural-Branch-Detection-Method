@@ -1,4 +1,4 @@
-import cv2
+import cv2, csv
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx # pip install networkx
@@ -389,6 +389,23 @@ class Skeleton:
             # Stocker la branche principale
             for i in range(0, len(main_branch_edges)-1):
                 self.main_branch.append((main_branch_edges[i], main_branch_edges[i+1]))
+
+    def save_as_csv(self, filename):
+        """
+            Enregistrer les caractéristiques de chaque branches 
+            ans un fichier csv spécifié en entrée
+        """
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['Source', 'Target', 'Length', 'Thickness', 'Depth'])
+            for edge in self.G.edges(data=True):
+                source = edge[0]
+                target = edge[1]
+                length = edge[2].get('length', '')
+                width = edge[2].get('thickness', '')
+                depth = edge[2].get('depth', '')
+                writer.writerow([source, target, length, width, depth])
+
 
 
     

@@ -1,4 +1,4 @@
-import cv2, time
+import cv2, time, csv
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx # pip install networkx
@@ -91,14 +91,15 @@ if __name__ == '__main__':
         # Calculer une approximation polynomiale de la branche
         branch.least_square_approximation()
 
-        # Tracer l'approximations de la branche
-        # branch.plot_approximation()
-
         # Calculer l'épaisseur moyenne de la branche
         branch.measure_average_thickness(image)
 
+        # Relier la branche au centre du neurone si son point de depart est 
+        # un point adjacent du soma
         branch.relier_centre(point_adja, centre, image)
         branch.least_square_approximation()
+
+        # Tracer l'approximations de la branche
         branch.plot_approximation()
 
         # Calculer la longueur de la branche
@@ -113,6 +114,9 @@ if __name__ == '__main__':
 
     # # Trouver la branche principale (chemin le plus long du graphe)
     skeleton.get_main_branch()
+
+    # Exporter le graphe sous forme d'un fichier csv
+    skeleton.save_as_csv('graph.csv')
 
     # Afficher la fenetre Matplotlib
     # plt.grid()
