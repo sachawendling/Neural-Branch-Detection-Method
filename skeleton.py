@@ -309,6 +309,24 @@ class Skeleton:
 
         # Ajouter les arêtes dans le graphe
         G.add_edges_from(edges_list)
+
+        # Calcul de la profondeur de chaque noeud
+        depth = nx.shortest_path_length(G, source=tuple(self.soma))
+
+        # Création d'un dictionnaire pour stocker la profondeur de chaque arête
+        edge_depth = {}
+        for u, v in G.edges():
+            if depth[u] < depth[v]:
+                edge_depth[(u, v)] = depth[v]
+            else:
+                edge_depth[(u, v)] = depth[u]
+
+        # parcours des arêtes
+        for edge in G.edges():
+            u, v = edge[0], edge[1]
+            d = edge_depth[u, v]
+            nx.set_edge_attributes(G, {(u, v): {"depth": d}})
+
         self.G = G
     
     def get_main_branch(self):

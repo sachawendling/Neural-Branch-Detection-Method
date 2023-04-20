@@ -53,7 +53,7 @@ def find_noyau(img, skel):
 if __name__ == '__main__':
 
     # Ouvrir l'image sur laquelle travailler
-    image = cv2.imread('test1.jpeg', 0)
+    image = cv2.imread('test4.tif', 0)
     image = cv2.resize(image, (500, 500))
 
     # Filtrage bilatéral ou gaussien pour réduire le bruit
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     image = cv2.GaussianBlur(image, (kernel_size,kernel_size), 0)
 
     # Segmentation de l'image
-    threshold = 60
+    threshold = 25
     _, image = cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)
 
     # Squelettisation: Recuperer le squelette du neuronne et l'afficher
@@ -75,13 +75,13 @@ if __name__ == '__main__':
 
     # Afficher le squelette
     # skeleton.plot()
+    plt.scatter(skeleton.soma[0], skeleton.soma[1], color="orange")
 
     # Detecter les ramifications du squelette en parcourant tous les points
     skeleton.get_branching_points(point_adja)
     for p in skeleton.branching_points:
         plt.scatter(p[0], p[1], color="red")
-    plt.scatter(skeleton.soma[0], skeleton.soma[1], color="orange")
-
+    
     # Segmenter les branches en partant des points de ramification
     skeleton.segmentation()
 
@@ -111,30 +111,24 @@ if __name__ == '__main__':
     # les points de ramifications comme sommet et les branches comme arêtes
     skeleton.to_graph()
 
-    # Trouver la branche principale (chemin le plus long du graphe)
+    # # Trouver la branche principale (chemin le plus long du graphe)
     skeleton.get_main_branch()
 
     # Afficher la fenetre Matplotlib
     # plt.grid()
     plt.imshow(image, cmap='gray', vmin=0, vmax=255)
-    # plt.show()
+    plt.show()
 
     # Afficher le graphe correspondant au neurone
     plt.figure()
     pos = nx.spring_layout(skeleton.G)
-    colors = [
-        "purple" if (node == tuple(centre)) else "blue"
-        for node in skeleton.G.nodes()
-    ]
+    colors = ["purple" if (node == tuple(centre)) else "blue" for node in skeleton.G.nodes()]
     nx.draw_networkx_nodes(skeleton.G, pos, node_color=colors)
-
     nx.draw_networkx_edges(skeleton.G, pos)
     nx.draw_networkx_edges(skeleton.G, pos, edgelist=skeleton.main_branch, edge_color='r')
-    nx.draw_networkx_edge_labels(skeleton.G, pos, font_size=6,
-        edge_labels = {
-            (u, v): f"thickness:{d['thickness']}\nlength:{d['length']}" 
-            for u, v, d in skeleton.G.edges(data=True)
-        }
-    )
+    nx.draw_networkx_edge_labels(skeleton.G, pos, font_size=6, edge_labels={
+        (u, v): f"thickness:{d['thickness']}\nlength:{d['length']}\ndepth:{d['depth']}" 
+        for u, v, d in skeleton.G.edges(data=True)
+    })
     nx.draw_networkx_labels(skeleton.G, pos)
     plt.show()
