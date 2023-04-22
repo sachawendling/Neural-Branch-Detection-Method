@@ -2,8 +2,10 @@ import cv2, time, csv
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx # pip install networkx
+import tkinter as tk
 
 from skeleton import Skeleton
+import gui
 
 def find_noyau(img, skel):
 
@@ -49,11 +51,12 @@ def find_noyau(img, skel):
 
         return centre, output, unique_adjacent_pixel 
 
-# Point d'entree
-if __name__ == '__main__':
+def traitement():
+
+    fig1 = plt.figure()
 
     # Ouvrir l'image sur laquelle travailler
-    image = cv2.imread('test4.tif', 0)
+    image = cv2.imread("images/" + gui.imgsrc_input.get(), 0)
     image = cv2.resize(image, (500, 500))
 
     # Filtrage bilatéral ou gaussien pour réduire le bruit
@@ -62,7 +65,7 @@ if __name__ == '__main__':
     image = cv2.GaussianBlur(image, (kernel_size,kernel_size), 0)
 
     # Segmentation de l'image
-    threshold = 25
+    threshold = float(gui.thresh_input.get())
     _, image = cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)
 
     # Squelettisation: Recuperer le squelette du neuronne et l'afficher
@@ -116,15 +119,14 @@ if __name__ == '__main__':
     skeleton.get_main_branch()
 
     # Exporter le graphe sous forme d'un fichier csv
-    skeleton.save_as_csv('graph.csv')
+    skeleton.save_as_csv(gui.imgsrc_input.get())
 
     # Afficher la fenetre Matplotlib
     # plt.grid()
     plt.imshow(image, cmap='gray', vmin=0, vmax=255)
-    plt.show()
 
     # Afficher le graphe correspondant au neurone
-    plt.figure()
+    fig2 = plt.figure()
     pos = nx.spring_layout(skeleton.G)
     colors = ["purple" if (node == tuple(centre)) else "blue" for node in skeleton.G.nodes()]
     nx.draw_networkx_nodes(skeleton.G, pos, node_color=colors)
@@ -135,4 +137,15 @@ if __name__ == '__main__':
         for u, v, d in skeleton.G.edges(data=True)
     })
     nx.draw_networkx_labels(skeleton.G, pos)
-    plt.show()
+
+    # Afficher les 2 figures sur l'interface graphique
+    gui.afficher_plots(fig1, fig2)
+
+# Point d'entree
+if __name__ == '__main__':
+    
+    # Ajouter un bouton pour lancer le traitement
+    button = tk.Button(gui.fen, text='Traitement',width=20, height=3, command=traitement)
+    button.place(x=550, y=90)
+
+    gui.fen.mainloop()

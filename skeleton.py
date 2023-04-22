@@ -390,11 +390,12 @@ class Skeleton:
             for i in range(0, len(main_branch_edges)-1):
                 self.main_branch.append((main_branch_edges[i], main_branch_edges[i+1]))
 
-    def save_as_csv(self, filename):
+    def save_as_csv(self, name):
         """
             Enregistrer les caractéristiques de chaque branches 
-            ans un fichier csv spécifié en entrée
+            dans un fichier csv spécifié en entrée
         """
+        filename = "outputs/" + name.split('.')[0] + "-graph.csv"
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['Source', 'Target', 'Length', 'Thickness', 'Depth'])

@@ -13,4 +13,6 @@ Matplotlib
 Numpy
 Scipy
 NetworkX
+Tkinter
+PIL
 ```
