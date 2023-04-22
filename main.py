@@ -70,7 +70,11 @@ def traitement():
 
     # Squelettisation: Recuperer le squelette du neuronne et l'afficher
     thinned_image = cv2.ximgproc.thinning(image)
-    centre, thinned_image, point_adja = find_noyau(image, thinned_image)
+    try:
+        centre, thinned_image, point_adja = find_noyau(image, thinned_image)
+    except TypeError:
+        print("Seuil trop élevé: le noyau n'a pas été détecté")
+        return
     skeleton = Skeleton(thinned_image, centre)
 
     # Enlever quelques points inutiles
