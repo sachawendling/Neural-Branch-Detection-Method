@@ -8,48 +8,60 @@ from skeleton import Skeleton
 import gui
 
 def find_noyau(img, skel):
+    """
+    A partir d'une image binarisée et de son squelette : trouve son noyau, retourne son centre, les points adjacents au noyau
+     du squelette et le squelette sans les points à l'intérieur du noyau
+    """
 
-    # Erosion et dilatation
+    # Erosion avec une ellipse
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     thresh = cv2.erode(img, kernel, iterations=9)
 
-    # Appliquer un filtre gaussien
+    # Appliquer un filtre gaussien et une dilatation
     thresh = cv2.GaussianBlur(thresh, (3, 3), 0)
     opening = cv2.dilate(thresh, kernel, iterations=9)
 
     # Trouver les contours
     contours, hierarchy = cv2.findContours(opening, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+    contour=contours[0]
     # Calculer le centroïde
-    for contour in contours : 
-        M = cv2.moments(contour)
-        centroid_x = int(M['m10'] / M['m00'])
-        centroid_y = int(M['m01'] / M['m00'])
-        centre=np.array((centroid_x,centroid_y))
-        mask=np.zeros_like(skel)
+    M = cv2.moments(contour)
+    centroid_x = int(M['m10'] / M['m00'])
+    centroid_y = int(M['m01'] / M['m00'])
+    centre=np.array((centroid_x,centroid_y))
 
-        cv2.drawContours(mask, [contour], 0, 255, -1)
-        inverse_mask=cv2.bitwise_not(mask)  
-        output = cv2.bitwise_and(skel, inverse_mask)
-        adjacent_pixels = []
-        for cnt in contour : 
-            x, y = cnt[0]
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    if dx == 0 and dy == 0:
-                        continue
-                    if output[y + dy, x + dx] == 255:
-                        adjacent_pixels.append((x + dx, y + dy))
-                        
-        unique_adjacent_pixel=list(set(adjacent_pixels))
-        for p in unique_adjacent_pixel : 
-            for op in unique_adjacent_pixel :
-                if p==op :
-                    continue 
-                if np.abs(p[1]-op[1])<=2 and np.abs(p[0]-op[0])<=2 :
-                    unique_adjacent_pixel.remove(op)
+    #Retire les points du squelette qui sont dans le noyau
 
-        return centre, output, unique_adjacent_pixel 
+    #Applique le masque du noyau sur le squelette
+    mask=np.zeros_like(skel)
+    cv2.drawContours(mask, [contour], 0, 255, -1)
+    inverse_mask=cv2.bitwise_not(mask)  
+    output = cv2.bitwise_and(skel, inverse_mask)
+
+    #Cherche les points du squelette collés au contour du noyau
+    adjacent_pixels = []
+    for cnt in contour : #pour chaque morceau du contour
+        x, y = cnt[0]
+        #On cherche les points voisins de dx et dy (les points à l'intérieur du noyau ont deja été enlevé)
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx == 0 and dy == 0:
+                    continue
+                if output[y + dy, x + dx] == 255:
+                    adjacent_pixels.append((x + dx, y + dy))
+
+    #On retire les doublons de la liste                 
+    unique_adjacent_pixel=list(set(adjacent_pixels))
+
+    #On supprime les points adjacents qui sont voisins
+    for p in unique_adjacent_pixel : 
+        for op in unique_adjacent_pixel :
+            if p==op :
+                continue 
+            if np.abs(p[1]-op[1])<=2 and np.abs(p[0]-op[0])<=2 :
+                unique_adjacent_pixel.remove(op)
+
+    return centre, output, unique_adjacent_pixel 
 
 def traitement():
 
@@ -72,7 +84,7 @@ def traitement():
     thinned_image = cv2.ximgproc.thinning(image)
     try:
         centre, thinned_image, point_adja = find_noyau(image, thinned_image)
-    except TypeError:
+    except IndexError:
         print("Seuil trop élevé: le noyau n'a pas été détecté")
         return
     skeleton = Skeleton(thinned_image, centre)
@@ -82,6 +94,8 @@ def traitement():
 
     # Afficher le squelette
     # skeleton.plot()
+
+    #Afficher le centre
     plt.scatter(skeleton.soma[0], skeleton.soma[1], color="orange")
 
     # Detecter les ramifications du squelette en parcourant tous les points
@@ -104,6 +118,7 @@ def traitement():
         # Relier la branche au centre du neurone si son point de depart est 
         # un point adjacent du soma
         branch.relier_centre(point_adja, centre, image)
+
         branch.least_square_approximation()
 
         # Tracer l'approximations de la branche
@@ -113,6 +128,7 @@ def traitement():
         branch.measure_length()
         print("---")
 
+    #Les branches qui partent d'un point adjacent partent du centre désormais
     skeleton.remplacement_des_points(point_adja)
 
     # Ranger toutes les branches dans une structure de graphe avec 

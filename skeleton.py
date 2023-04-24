@@ -45,6 +45,9 @@ class Skeleton:
         """
             Simplifie les lignes du squelette pour éviter d'avoir un surplus de points par endroits
             ce qui occasionne parfois des points de ramifications qui ont 4 voisins
+            ---
+            Complexité : O(N) affectations
+            N = nb de points
         """
         new_points = []
         for point in self.points:
@@ -76,6 +79,9 @@ class Skeleton:
         """
             Detecter les points de ramification du squelette, c'est-à-dire les points en
             lesquels une branche vient se séparer en deux. On parcourt tous les points du squelette.
+            ---
+            Complexité : O(N)
+            N = nb de points
         """
         # Liste qui contient les points pouvant être des ramifications du squelette
         branching_points_candidates = []
@@ -83,6 +89,7 @@ class Skeleton:
         # Liste a retourner qui contient les points exacts de ramification
         branching_points = []
 
+        #Les points adjacents au contour sont considérés comme des points de ramification car point de départ des branches
         for p in point_adja : 
             branching_points.append(p)
 
@@ -170,6 +177,9 @@ class Skeleton:
             Parcourir les branches du squelette en partant des points de ramification.
             Les branches sont stockées dans une liste d'instances de la classe Branch.
             Doit être appelée apres la detection des points de ramification.
+            ---
+            Complexité : O(N)
+            N = nb de points
         """
         # Pour chaque point de ramification
         for branching_point in self.branching_points:
@@ -266,6 +276,9 @@ class Skeleton:
                     self.branches.append(branch)
 
     def remplacement_des_points(self,point_adjacent): 
+        """
+        Supprime les points adjacents de la liste des points de ramification et ajoute le centre
+        """
         i=0 
         while i<len(self.branching_points) : 
             if self.branching_points[i] in point_adjacent :
@@ -298,7 +311,7 @@ class Skeleton:
         # de manière à construire la liste des arêtes
         edges_list = []
         for b in self.branches:
-            if b.centre == 1 : 
+            if b.centre == 1 : #si la branche part du centre alors on ajoute le centre en point de départ 
                 edges_list.append(
                     (tuple(self.soma), b.end, {'thickness': b.thickness, 'length': b.length})
                 )

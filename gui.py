@@ -9,20 +9,6 @@ def on_closing():
     fen.destroy()
 fen.protocol("WM_DELETE_WINDOW", on_closing)
 
-def afficher_image():
-    # Ouvrir l'image avec PIL
-    img = Image.open(imgsrc_input.get())
-    
-    # Redimensionner l'image si besoin
-    # img = img.resize((largeur, hauteur))
-    
-    # Convertir l'image en format compatible avec Tkinter
-    img_tk = ImageTk.PhotoImage(img)
-    
-    # Créer un widget Label pour afficher l'image
-    label_img = tk.Label(fen, image=img_tk)
-    label_img.pack()
-
 def afficher_plots(fig1, fig2):
     canvas = FigureCanvasTkAgg(fig1, master=fen)
     canvas1 = FigureCanvasTkAgg(fig2, master=fen)
@@ -69,9 +55,6 @@ imgsrc_input = tk.Entry(fen)
 imgsrc_input.place(x=50, y=150)
 thresh_input = tk.Entry(fen)
 thresh_input.place(x=50, y=200)
-
-bouton = tk.Button(fen, text="Afficher l'image", command=afficher_image)
-bouton.pack()
 
 text = tk.Label(fen, text="EXECUTER", font=("Arial", 20))
 text.place(x=550, y=50)

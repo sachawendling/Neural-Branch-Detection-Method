@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import lsq
 
+#interpole des points par un segment parametrique represente par (line_x,line_y)
 def parametric_linear_interpolation(points):
     x=points[0:-2:2]
     y=points[1:-1:2]
@@ -49,7 +50,6 @@ class Branch:
 
         self.centre = -1
         self.line = np.array([])
-        self.fonction_centre = None
 
     def is_branching_out(self):
         """
@@ -62,18 +62,21 @@ class Branch:
         """
             Retourne True ssi le premier point de la branche est le centre
         """
+        #si le premier point appartient au point adjacent
         if self.start in adjacent : 
 
             start_point = self.start
             end_point = centre
-            # Tracer un segment de ligne droite entre les deux points sur la carte de squelette
+            # Trace un segment entre le centre et le point de depart
             path_img = np.zeros_like(image)
             line=cv2.line(path_img, start_point, end_point, 255, 1)
+
+            #On recupere les coordonnées des points de la ligne
             for i in range(0,len(line)):
                 for j in range(0,len(line[i])):
                     if line[i][j]==255 :
-                        self.line=np.append(self.line,np.array([j,i]))
-            self.centre=1
+                        self.line=np.append(self.line,np.array([j,i])) 
+            self.centre=1 #cette branche est reliée au centre
 
     def least_square_approximation(self):
         """
@@ -125,9 +128,11 @@ class Branch:
         """
         t = np.linspace(0, 1, 1000)
         fonction=[[],[]]
+
+        #si la branche est reliée au centre
         if self.centre==1 : 
+            #on interpole la line par une fonction lineaire
             fonction=parametric_linear_interpolation(self.line)
-            self.fonction_centre=fonction
 
         ptx = lsq.compute_parametric_curve(self.lsqcfx, t)
         ptx=np.concatenate((fonction[0],ptx))
@@ -226,8 +231,17 @@ class Branch:
         """
         # Calcul des points de la courbe sur [0,1]
         t = np.linspace(0, 1, 300)
+
+        fonction=[[],[]]
+
+        #si calcul de la longueur des branches depuis le centre, decommentez ci-dessous :
+        #if self.centre==1 : 
+        #    fonction=parametric_linear_interpolation(self.line)
+
         ptx = lsq.compute_parametric_curve(self.lsqcfx, t)
+        ptx=np.concatenate((fonction[0],ptx))
         pty = lsq.compute_parametric_curve(self.lsqcfy, t)
+        pty=np.concatenate((fonction[1],pty))
 
         # Dérivées de x(t) et y(t)
         dxdt, dydt = np.gradient(ptx), np.gradient(pty)
