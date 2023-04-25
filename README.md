@@ -63,14 +63,11 @@ parametric_linear_interpolation(points):la complexité totale de cette fonction 
 Branch.__init__(self, points, branching_points):ne contient que des opérations
   en temps constant, donc sa complexité est O(1).
 Branch.is_branching_out():elle ne parcourt qu'un seul point, sa complexité est O(1).
-Branch.relier_centre(adjacent,centre,image): cette fonction effectue une 
+Branch.plot_approximation(): cette fonction effectue une 
   approximation des moindres carrés d'une courbe polynomiale à partir d'une liste
   de points. Le degré est fixé à 8, ce qui signifie que la complexité est
   de l'ordre de O(n^3) mais, comme le nombre de points de contrainte est faible (2 point: depart et arrivee ),
   la complexité totale reste relativement faible.
-Branch.plot_approximation(): parcourt une liste de points, donc sa complexité est O(1)
-Par conséquent, la complexité totale de ce code est dominée par 
-least_square_approximation, ce qui rend la complexité totale du code O(n^3).
  
 
 skeleton .py :
@@ -90,13 +87,4 @@ main.py:
 'afficher_image': charge l'image et l'affiche à l'aide de la bibliothèque Tkinter. La complexité de cette fonction dépend de la taille de l'image, mais dans l'ensemble, elle est relativement faible.
 
 'code': charge l'image et la redimensionne, puis applique un filtre de flou. La complexité de cette fonction dépend donc de la taille de l'image et de la taille du filtre de flou. En général, la complexité de cette fonction est O(n^2), où n est la largeur ou la hauteur de l'image redimensionnée.
-
-
-
-
-
-
-
-
-
 ```
