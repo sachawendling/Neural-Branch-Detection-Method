@@ -68,6 +68,10 @@ Branch.least_square_approximation(): cette fonction effectue une
   de points. Le degré est fixé à 8, ce qui signifie que la complexité est
   de l'ordre de O(n^3) mais, comme le nombre de points de contrainte est faible (2 point: depart et arrivee ),
   la complexité totale reste relativement faible.
+Branch.relier_centre(adjacent,centre,image): on a deux boucles imbrique donc une complexite au pire des cas de O(n*m)
+measure_average_thickness : la boucle for parcourt les point de la courbe et pour
+chaque point on deux boucles while non imbriquée qui parcourt les pixels de l'image
+jusqu'a trouver un pixel noir , au total la complexité est de l'ordre de O(n^2) dans le pire cas.
  
 
 skeleton .py :
