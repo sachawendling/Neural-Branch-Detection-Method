@@ -14,7 +14,7 @@ Numpy
 Scipy
 NetworkX
 ```
-#Classes et fichiers :
+## Classes et fichiers :
 ```
 skeleton .py :
 La classe Skeleton a pour but de représenter le squelette d'une image binaire et de permettre d'effectuer des traitements dessus. 
@@ -38,7 +38,7 @@ La fonction ConstructionMXB prend en entrée une matrice A, une matrice F, un ve
 La fonction LeastSquaresConstraintsMonomes prend en entrée deux vecteurs xi et yi, deux vecteurs xic et yic, un entier degree et un vecteur t. Elle calcule le polynôme d'approximation aux moindres carrés p(t) de degré degree approchant les données (xi, yi) sous la contrainte de passer par les points (xic, yic) en utilisant la base des monômes. Elle renvoie le vecteur des coefficients du polynôme.
 La fonction compute_parametric_curve prend en entrée le vecteur des coefficients cf et le vecteur t. Elle calcule la courbe paramétrique correspondante au polynôme représenté par cf évalué sur t en utilisant la méthode de Horner et renvoie le vecteur pt.
 ```
-#Etude de complexité
+## Etude de complexité
 ```   
 Lsq.py :
 
