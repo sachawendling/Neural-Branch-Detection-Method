@@ -63,7 +63,7 @@ parametric_linear_interpolation(points):la complexité totale de cette fonction 
 Branch.__init__(self, points, branching_points):ne contient que des opérations
   en temps constant, donc sa complexité est O(1).
 Branch.is_branching_out():elle ne parcourt qu'un seul point, sa complexité est O(1).
-Branch.plot_approximation(): cette fonction effectue une 
+Branch.least_square_approximation(): cette fonction effectue une 
   approximation des moindres carrés d'une courbe polynomiale à partir d'une liste
   de points. Le degré est fixé à 8, ce qui signifie que la complexité est
   de l'ordre de O(n^3) mais, comme le nombre de points de contrainte est faible (2 point: depart et arrivee ),
