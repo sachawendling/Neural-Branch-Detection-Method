@@ -93,15 +93,17 @@ def traitement():
     skeleton.simplify()
 
     # Afficher le squelette
-    # skeleton.plot()
+    if gui.plot_skeleton.get() == True:
+        skeleton.plot()
 
     #Afficher le centre
     plt.scatter(skeleton.soma[0], skeleton.soma[1], color="orange")
 
     # Detecter les ramifications du squelette en parcourant tous les points
     skeleton.get_branching_points(point_adja)
-    for p in skeleton.branching_points:
-        plt.scatter(p[0], p[1], color="red")
+    if gui.plot_brpts.get() == True:
+        for p in skeleton.branching_points:
+            plt.scatter(p[0], p[1], color="red")
     
     # Segmenter les branches en partant des points de ramification
     skeleton.segmentation()
@@ -122,7 +124,8 @@ def traitement():
         branch.least_square_approximation()
 
         # Tracer l'approximations de la branche
-        branch.plot_approximation()
+        if gui.plot_trace_lsq.get() == True:
+            branch.plot_approximation()
 
         # Calculer la longueur de la branche
         branch.measure_length()
@@ -133,13 +136,14 @@ def traitement():
 
     # Ranger toutes les branches dans une structure de graphe avec 
     # les points de ramifications comme sommet et les branches comme arêtes
-    skeleton.to_graph()
+    if gui.plot_graph.get() == True:
+        skeleton.to_graph()
 
-    # # Trouver la branche principale (chemin le plus long du graphe)
-    skeleton.get_main_branch()
+        # # Trouver la branche principale (chemin le plus long du graphe)
+        skeleton.get_main_branch()
 
-    # Exporter le graphe sous forme d'un fichier csv
-    skeleton.save_as_csv(gui.imgsrc_input.get())
+        # Exporter le graphe sous forme d'un fichier csv
+        skeleton.save_as_csv(gui.imgsrc_input.get())
 
     # Afficher la fenetre Matplotlib
     # plt.grid()
@@ -147,16 +151,17 @@ def traitement():
 
     # Afficher le graphe correspondant au neurone
     fig2 = plt.figure()
-    pos = nx.spring_layout(skeleton.G)
-    colors = ["purple" if (node == tuple(centre)) else "blue" for node in skeleton.G.nodes()]
-    nx.draw_networkx_nodes(skeleton.G, pos, node_color=colors)
-    nx.draw_networkx_edges(skeleton.G, pos)
-    nx.draw_networkx_edges(skeleton.G, pos, edgelist=skeleton.main_branch, edge_color='r')
-    nx.draw_networkx_edge_labels(skeleton.G, pos, font_size=6, edge_labels={
-        (u, v): f"thickness:{d['thickness']}\nlength:{d['length']}\ndepth:{d['depth']}" 
-        for u, v, d in skeleton.G.edges(data=True)
-    })
-    nx.draw_networkx_labels(skeleton.G, pos)
+    if gui.plot_graph.get() == True:
+        pos = nx.spring_layout(skeleton.G)
+        colors = ["purple" if (node == tuple(centre)) else "blue" for node in skeleton.G.nodes()]
+        nx.draw_networkx_nodes(skeleton.G, pos, node_color=colors)
+        nx.draw_networkx_edges(skeleton.G, pos)
+        nx.draw_networkx_edges(skeleton.G, pos, edgelist=skeleton.main_branch, edge_color='r')
+        nx.draw_networkx_edge_labels(skeleton.G, pos, font_size=6, edge_labels={
+            (u, v): f"thickness:{d['thickness']}\nlength:{d['length']}\ndepth:{d['depth']}" 
+            for u, v, d in skeleton.G.edges(data=True)
+        })
+        nx.draw_networkx_labels(skeleton.G, pos)
 
     # Afficher les 2 figures sur l'interface graphique
     gui.afficher_plots(fig1, fig2)

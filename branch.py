@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-import lsq
+import lsq, gui
 
 #interpole des points par un segment parametrique represente par (line_x,line_y)
 def parametric_linear_interpolation(points):
@@ -175,17 +175,20 @@ class Branch:
 
         # Pour chaque point sur la courbe
         for p in points:
-            plt.scatter(p[0], p[1], color="red")
+            if gui.plot_trace_thickness == True:
+                plt.scatter(p[0], p[1], color="red")
 
             # Calculer les tangeantes de l'approximation à intervalle régulier
             tangent = np.array([dxdt[point_indice], dydt[point_indice]])
             tangent = tangent / np.linalg.norm(tangent)
-            plt.quiver(p[0], p[1], tangent[0], tangent[1], angles='xy', scale_units='xy', scale=1)
+            if gui.plot_trace_thickness == True:
+                plt.quiver(p[0], p[1], tangent[0], tangent[1], angles='xy', scale_units='xy', scale=1)
 
             # Pour chaque tangeante, calculer la direction perpendiculaire associée
             u = np.array([-tangent[1], tangent[0]])
             u = u / np.linalg.norm(u)
-            plt.quiver(p[0], p[1], u[0], u[1], angles='xy', scale_units='xy', scale=1)
+            if gui.plot_trace_thickness == True:
+                plt.quiver(p[0], p[1], u[0], u[1], angles='xy', scale_units='xy', scale=1)
 
             # Compter les pixels blancs de l'image dans la direction de cette perpendiculaire
             # On compte dans le sens de u
@@ -193,7 +196,8 @@ class Branch:
             while image[round(pk[1])][round(pk[0])] == 255:
                 measure += 1
                 k += 1
-                plt.scatter(pk[0], pk[1], s=1.5, color="red")
+                if gui.plot_trace_thickness == True:
+                    plt.scatter(pk[0], pk[1], s=1.5, color="red")
                 pk = p + k*u
 
             # Et on compte dans le sens de -u pour faire toute l'epaisseur
@@ -201,7 +205,8 @@ class Branch:
             while image[round(pk[1])][round(pk[0])] == 255:
                 measure += 1
                 k += 1
-                plt.scatter(pk[0], pk[1], s=1.5, color="red")
+                if gui.plot_trace_thickness == True:
+                    plt.scatter(pk[0], pk[1], s=1.5, color="red")
                 pk = p - k*u
 
             # On enregistre la mesure de l'epaisseur au point p

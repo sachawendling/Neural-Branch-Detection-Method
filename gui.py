@@ -31,6 +31,13 @@ def afficher_plots(fig1, fig2):
     canvas.get_tk_widget().pack(side=tk.LEFT)
     canvas1.get_tk_widget().pack(side=tk.RIGHT)
 
+# Fonction appelée lorsque la checkbox est activée/désactivée
+def on_checkbox_clicked():
+    if var.get():
+        print("Checkbox cochée")
+    else:
+        print("Checkbox décochée")
+
 # Afficher les logos sur la fenetre
 img = Image.open("assets/uga_logo.jpeg")
 img = img.resize((150, 80))
@@ -61,3 +68,37 @@ text.place(x=550, y=50)
 fen.title("Traitement des neurones")
 fen.geometry("2000x1000")
 fen.resizable(width=True, height=True)
+
+# Checkbox pour afficher le squelette 
+plot_skeleton = tk.BooleanVar()
+plot_skeleton_checkbox = tk.Checkbutton(fen, text="Afficher le squelette", variable=plot_skeleton)
+plot_skeleton_checkbox.place(x=1200, y=100)
+plot_skeleton_checkbox.pack()
+
+# print(plot_skeleton_gui.get())
+
+# Checkbox pour afficher la trace du calcul des epaisseurs
+plot_trace_thickness = tk.BooleanVar()
+plot_trace_thickness_checkbox = tk.Checkbutton(fen, text="Afficher la trace de la mesure des épaisseurs", variable=plot_trace_thickness)
+plot_trace_thickness_checkbox.place(x=1200, y=300)
+plot_trace_thickness_checkbox.pack()
+
+# Checkbox pour afficher l'approximation polynomiale
+plot_trace_lsq = tk.BooleanVar()
+plot_trace_lsq_checkbox = tk.Checkbutton(fen, text="Afficher les approximations polynomiales", variable=plot_trace_lsq)
+plot_trace_lsq_checkbox.place(x=1200, y=400)
+plot_trace_lsq_checkbox.pack()
+
+# Checkbox pour afficher les points de ramification
+plot_brpts = tk.BooleanVar()
+plot_brpts_checkbox = tk.Checkbutton(fen, text="Afficher les points de ramification", variable=plot_brpts)
+plot_brpts_checkbox.place(x=1200, y=500)
+plot_brpts_checkbox.pack()
+
+# Checkbox pour représenter le neurone par un graphe
+plot_graph = tk.BooleanVar()
+plot_graph_checkbox = tk.Checkbutton(fen, text="Convertir le squelette en graphe", variable=plot_graph)
+plot_graph_checkbox.place(x=1200, y=500)
+plot_graph_checkbox.pack()
+
+
