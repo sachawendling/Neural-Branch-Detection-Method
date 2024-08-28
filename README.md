@@ -1,5 +1,9 @@
 # Neural Branch Detection Method
 
+![neural branch detection method illustration](illustration.png)
+
+This project involves developing a method for understanding neural structure from noisy images. The ultimate goal is to represent a neuron as a tree-like data structure, where the root is the neuron nucleus, with branches weighted by thickness, length and depth. We can then identify the longest branch whose properties are of interest for neuro-medical research.
+
 ## Usage
 ```
 python main.py
@@ -14,81 +18,80 @@ Numpy
 Scipy
 NetworkX
 ```
-## Classes et fichiers :
-```
-skeleton .py :
-La classe Skeleton a pour but de représenter le squelette d'une image binaire et de permettre d'effectuer des traitements dessus. 
-La méthode __init__ est appelée lors de la création d'un nouvel objet de la classe Skeleton. Elle prend en argument une image binaire matrix et une instance de la classe Soma soma, puis initialise les différents attributs de l'objet.
-La méthode plot permet d'afficher les points du squelette sur une fenêtre Matplotlib.
-La méthode simplify permet de simplifier les lignes du squelette pour éviter d'avoir un surplus de points par endroits ce qui occasionne parfois des points de ramifications qui ont 4 voisins.
-La méthode get_neighbors permet de récupérer les voisins d'un point donné sur une case adjacente, qui ne sont pas diagonaux si l'option excludeDiag est à True et qui ne sont pas dans la liste à exclure excludeThose.
-La méthode get_branching_points permet de détecter les points de ramification du squelette, c'est-à-dire les points en lesquels une branche vient se séparer en deux. Cette méthode parcourt tous les points du squelette.
+## Classes and Files:
 
-Branch.py :
--La classe Branch représente une branche du squelette. 
-"init" : le constructeur de la classe qui initialise les propriétés de la branche.
-    • "is_branching_out" : retourne True si le dernier point de la branche est un point de ramification du squelette.
-    • "relier_centre" : prend en entrée les coordonnées du centre et trace un segment de ligne droite entre le premier point de la branche et le centre sur la carte de squelette.
-    • "least_square_approximation" : calcule une fonction d'approximation des points de la branche avec une méthode des moindres carrés.
-    • "plot_approximation" : calcule les points de la courbe paramétrique de l'approximation polynomiale avec une discrétisation de [0,1] et les coefficients de la fonction. Affiche la courbe.
-    • "measure_average_thickness" : calcule l'épaisseur moyenne de la branche.
-Lsq.py :
-ce fichier définit trois fonctions: ConstructionMXB, LeastSquaresConstraintsMonomes et compute_parametric_curve.
-La fonction ConstructionMXB prend en entrée une matrice A, une matrice F, un vecteur b et un vecteur c. Elle construit la matrice M et le vecteur B selon le schéma spécifié dans la docstring de la fonction et renvoie M et B.
-La fonction LeastSquaresConstraintsMonomes prend en entrée deux vecteurs xi et yi, deux vecteurs xic et yic, un entier degree et un vecteur t. Elle calcule le polynôme d'approximation aux moindres carrés p(t) de degré degree approchant les données (xi, yi) sous la contrainte de passer par les points (xic, yic) en utilisant la base des monômes. Elle renvoie le vecteur des coefficients du polynôme.
-La fonction compute_parametric_curve prend en entrée le vecteur des coefficients cf et le vecteur t. Elle calcule la courbe paramétrique correspondante au polynôme représenté par cf évalué sur t en utilisant la méthode de Horner et renvoie le vecteur pt.
-```
-## Etude de complexité
-```   
-Lsq.py :
+`skeleton.py`: The `Skeleton` class is designed to represent the skeleton of a binary image and allow processing on it.
 
-Le code a deux fonctions principales: ConstructionMXB et LeastSquaresConstraintsMonomes, qui sont appelées l'une par l'autre.
-La complexité de la fonction ConstructionMXB dépend principalement de 
-la complexité de l'opération matricielle np.dot(A.T, A). 
-Cette opération est de complexité O(n^2p), où n est le nombre de lignes dans A 
-et p le nombre de colonnes. 
-La complexité totale de ConstructionMXB est donc de O(n^2p).
-La complexité de la fonction LeastSquaresConstraintsMonomes dépend principalement
-de deux opérations matricielles : la construction de la matrice A(O(n^2) dans le pire des cas,)
-(de taille nblin1 x nbcol) et la construction de la matrice F (O(n^2) dans le pire des cas,)
-(de taille nblin2 x nbcol).
-La fonction compute_parametric_curve est de complexité O(degree n) car elle effectue une évaluation d'un polynôme de degré "degree" en n points de t.
-L'appel a la fonction ConstructionMXB est également de complexité O(n^2p)
-donc la complexite du code de ce fichier est de O(n^2p)
+- `__init__` takes a binary image matrix and an instance of the `Soma` class as arguments, then initializes the various attributes of the object.
+
+- `plot()` displays the skeleton points in a Matplotlib window.
+
+- `simplify()` simplifies the skeleton lines to avoid having an excess of points in some areas, which can sometimes cause branching points to have four neighbors.
+
+- `get_neighbors()` retrieves the neighbors of a given point in an adjacent cell, which are not diagonal if the `excludeDiag` option is set to `True` and are not in the exclusion list `excludeThose`.
+
+- `get_branching_points()` detects the branching points of the skeleton, meaning the points where a branch splits into two. This method scans all the points of the skeleton.
+
+`Branch.py`: The `Branch` class represents a branch of the skeleton.
+
+- `is_branching_out()`: returns True if the last point of the branch is a branching point of the skeleton.
+
+- `relier_centre()` takes the coordinates of the center as input and draws a straight line segment between the first point of the branch and the center on the skeleton map.
+
+- `least_square_approximation()` calculates an approximation function of the branch points using a least squares method.
+
+- `plot_approximation()` calculates the points of the parametric curve of the polynomial approximation with a discretization of [0,1] and the coefficients of the function. Displays the curve.
+
+- `measure_average_thickness()` calculates the average thickness of the branch.
+
+`Lsq.py`: This module defines three functions: `ConstructionMXB`, `LeastSquaresConstraintsMonomes`, and `compute_parametric_curve`.
+
+- `ConstructionMXB()` takes a matrix A, a matrix F, a vector b, and a vector c as input. It constructs the matrix M and the vector B according to the scheme specified in the function's docstring and returns M and B.
+
+- `LeastSquaresConstraintsMonomes()` takes two vectors xi and yi, two vectors xic and yic, an integer degree, and a vector t as input. It calculates the least squares approximation polynomial p(t) of degree `degree`, approximating the data (xi, yi) under the constraint of passing through the points (xic, yic) using the monomial basis. It returns the coefficient vector of the polynomial.
+
+- `compute_parametric_curve()` takes the coefficient vector cf and the vector t as input. It calculates the parametric curve corresponding to the polynomial represented by cf evaluated on t using Horner's method and returns the vector pt.
+
+## Complexity Analysis
+
+`Lsq.py` has two main functions: `ConstructionMXB` and `LeastSquaresConstraintsMonomes`, which are called by each other.
+
+- The complexity of the `ConstructionMXB()` function primarily depends on the complexity of the matrix operation `np.dot(A.T, A)`. This operation has a complexity of `O(n^2p)`, where n is the number of rows in A and p is the number of columns. Therefore, the total complexity of `ConstructionMXB()` is `O(n^2p)`.
+
+- The complexity of the `LeastSquaresConstraintsMonomes()` function mainly depends on two matrix operations: the construction of the matrix A (`O(n^2)` in the worst case, of size nblin1 x nbcol) and the construction of the matrix F (`O(n^2)` in the worst case, of size nblin2 x nbcol).
+
+- The `compute_parametric_curve()` function has a complexity of `O(d*n)` because it performs an evaluation of a degree d polynomial at n points of t.
+
+- The call to `ConstructionMXB()` is also of complexity `O(n^2p)`, so the overall complexity of this module is `O(n^2p)`.
+
+`Branch.py`:
+
+- The constructor only contains constant-time operations, so its complexity is `O(1)`.
+
+- `parametric_linear_interpolation()`: the total complexity of this function is `O(n)`.
+
+- `is_branching_out()`: it only processes one point, so its complexity is `O(1)`.
+
+- `least_square_approximation()` performs a least squares approximation of a polynomial curve from a list of points. The degree is fixed at 8, meaning the complexity is on the order of `O(n^3)`, but since the number of constraint points is small (2 points: start and end), the total complexity remains relatively low.
+
+- `relier_centre()`: There are two nested loops, so the worst-case complexity is `O(n*m)`.
+
+- `measure_average_thickness()`: The for loop iterates over the points of the curve, and for each point, there are two non-nested while loops that iterate over the pixels of the image until a black pixel is found. Overall, the worst-case complexity is `O(n^2)`.
+
+`skeleton.py`:
+
+- `get_neighbors()` has a simple complexity of `O(1)` because it performs a simple search in a list.
+
+- `get_branching_points()` calls `get_neighbors()` for each point of the skeleton in a for loop with a complexity of `O(n^2)`. The loop `for k in range(10)` has a complexity of `O(1)`. Overall, this method has a complexity of `O(n^2)`. Other methods like the constructor and `simplify()` have a complexity of `O(n)` or less, as they traverse each element of the matrix once.
+
+- The rest of the code consists of simple calls with a negligible complexity of `O(1)`.
+
+`main.py`:
+
+- `find_noyau()` contains a for loop that iterates over all contours found in the image and calculates their centroid. For each contour, the function executes a series of operations, including creating a mask and calculating adjacent pixels. The complexity of this function therefore depends on the number of contours detected in the image and their size. If the image contains n contours and the largest contour has m pixels, then the complexity of this function is `O(nm)`.
+
+- `afficher_image()` loads the image and displays it using the Tkinter library. The complexity of this function depends on the size of the image, but overall, it is relatively low.
+
+- `code()` loads the image and resizes it, then applies a blur filter. The complexity of this function therefore depends on the size of the image and the size of the blur filter. In general, the complexity of this function is `O(n^2)`, where n is the width or height of the resized image.
 
 
-Branch.py :
-
-parametric_linear_interpolation(points):la complexité totale de cette fonction O(n).
-Branch.__init__(self, points, branching_points):ne contient que des opérations
-  en temps constant, donc sa complexité est O(1).
-Branch.is_branching_out():elle ne parcourt qu'un seul point, sa complexité est O(1).
-Branch.least_square_approximation(): cette fonction effectue une 
-  approximation des moindres carrés d'une courbe polynomiale à partir d'une liste
-  de points. Le degré est fixé à 8, ce qui signifie que la complexité est
-  de l'ordre de O(n^3) mais, comme le nombre de points de contrainte est faible (2 point: depart et arrivee ),
-  la complexité totale reste relativement faible.
-Branch.relier_centre(adjacent,centre,image): on a deux boucles imbrique donc une complexite au pire des cas de O(n*m)
-measure_average_thickness : la boucle for parcourt les point de la courbe et pour
-chaque point on deux boucles while non imbriquée qui parcourt les pixels de l'image
-jusqu'a trouver un pixel noir , au total la complexité est de l'ordre de O(n^2) dans le pire cas.
- 
-
-skeleton .py :
-
-get_neighbors(): a une simple complexite de O(1) car elle fait une simple recherche dans une liste
-get_branching_points(): fait appel a get_neighbors() pour chaque point du squelette
-dans une boucle 'for' avec une complexité de O(n^2). la boucle 'for k in range(10)' a une complexité de O(1).
-globalement cette methode a une complexité de O(n^2)
-Les autres méthodes, comme  __init__() et simplify(), ont une complexité de O(n) 
-ou moins, car elles parcourent chaque élément de la matrice une fois.
-le reste du code consiste a des appels simple avec une complexité de O(1) donc négligeable.
-
-main.py:
-
-'find_noyau': contient une boucle for qui parcourt tous les contours trouvés dans l'image et calcule leur centroïde. À chaque contour, la fonction exécute une série d'opérations, notamment la création d'un masque et le calcul des pixels adjacents. La complexité de cette fonction dépend donc du nombre de contours détectés dans l'image et de leur taille. Si l'image contient n contours et que le contour le plus grand a m pixels, alors la complexité de cette fonction est O(n * m).
-
-'afficher_image': charge l'image et l'affiche à l'aide de la bibliothèque Tkinter. La complexité de cette fonction dépend de la taille de l'image, mais dans l'ensemble, elle est relativement faible.
-
-'code': charge l'image et la redimensionne, puis applique un filtre de flou. La complexité de cette fonction dépend donc de la taille de l'image et de la taille du filtre de flou. En général, la complexité de cette fonction est O(n^2), où n est la largeur ou la hauteur de l'image redimensionnée.
-```
